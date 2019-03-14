@@ -35,7 +35,7 @@ class: inverse, center, middle
 ---
 class: center, middle
 
-![](spectrolab_slides_files/figure-html/unnamed-chunk-1-1.pdf)&lt;!-- --&gt;
+![](spectrolab_slides_files/figure-html/unnamed-chunk-1-1.png)&lt;!-- --&gt;
 
 ---
 
@@ -173,7 +173,7 @@ plot(psr_spec, lwd = 2, col = c("orange", "darkgreen", "purple"))
 plot(csv_spec, xlab = "Wavelength nm", main = "My Spec")
 ```
 
-![](spectrolab_slides_files/figure-html/unnamed-chunk-8-1.pdf)&lt;!-- --&gt;
+![](spectrolab_slides_files/figure-html/unnamed-chunk-8-1.png)&lt;!-- --&gt;
 
 ---
 # Plot spectra
@@ -232,7 +232,7 @@ plot(psr_spec[1, 360:700])
 plot(psr_spec_smooth[1, 360:700])
 ```
 
-![](spectrolab_slides_files/figure-html/unnamed-chunk-11-1.pdf)&lt;!-- --&gt;
+![](spectrolab_slides_files/figure-html/unnamed-chunk-11-1.png)&lt;!-- --&gt;
 
 ---
 class: inverse, center, middle
@@ -297,10 +297,10 @@ fit = plsr(chlorophyll ~ ., data = training_data, ncomp = 5)
 prediction = predict(object = fit, newdata = validation_spec, ncomp = 5)
 
 ## Plot truth against predictions
-plot(validation_chlo, prediction, cex = 1.2, pch = 16)
+par(mar = c(6,6,0,0)); plot(validation_chlo, prediction, pch = 16)
 ```
 
-![](spectrolab_slides_files/figure-html/unnamed-chunk-14-1.pdf)&lt;!-- --&gt;
+&lt;img src="spectrolab_slides_files/figure-html/unnamed-chunk-14-1.png" width="400px" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="libs/remark-latest.min.js"></script>

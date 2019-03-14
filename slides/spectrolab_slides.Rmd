@@ -35,7 +35,7 @@ i_spec = smooth(i_spec[ , 400:2400])
 ---
 class: center, middle
 
-```{r dev='pdf', fig.width = 14, fig.height = 11, echo=FALSE}
+```{r dev='png', fig.width = 14, fig.height = 11, echo=FALSE, dpi=600}
 par(mar = c(6,6,4,4))
 plot(i_spec, cex.lab = 2, cex.axis = 2, lwd = 3, col = c("blue", "orange"))
 ```
@@ -134,7 +134,7 @@ class: inverse, center, middle
 
 ### Statically with *plot*
 
-```{r eval=TRUE, dev='pdf', fig.width = 10, fig.height = 4.5}
+```{r eval=TRUE, dev='png', fig.width = 10, fig.height = 4.5, dpi=600}
 par(mfrow = c(1, 2))
 plot(psr_spec, lwd = 2, col = c("orange", "darkgreen", "purple"))
 plot(csv_spec, xlab = "Wavelength nm", main = "My Spec")
@@ -157,7 +157,7 @@ class: inverse, center, middle
 
 # Manipulating spectra: e.g. subset
 
-```{r eval=TRUE, dev='pdf', fig.width = 5, fig.height = 5, error=TRUE}
+```{r eval=TRUE, dev='png', fig.width = 5, fig.height = 5, error=TRUE, dpi=600}
 
 ## Subset spectra like if they were matrices
 psr_spec_trim = psr_spec[1:2 , 400:700]
@@ -171,7 +171,7 @@ psr_spec[ , 1:10]
 
 # Processing spectra: e.g. smooth
 
-```{r eval=TRUE, dev='pdf', fig.width = 9, fig.height = 4.5, error=FALSE, warning=FALSE, message=FALSE}
+```{r eval=TRUE, dev='png', fig.width = 9, fig.height = 4.5, error=FALSE, warning=FALSE, message=FALSE, dpi=600}
 ## Smooth spectra with a moving average
 psr_spec_smooth = smooth(psr_spec,
                          method = "moving_average", n = 20)
@@ -191,7 +191,7 @@ class: inverse, center, middle
 
 Convert spectra into **matrix** or **data.frame** in order to export or use them in regressions, ordinations, etc.
 
-```{r eval=TRUE, dev='pdf', fig.width = 5, fig.height = 5, error=TRUE}
+```{r eval=TRUE, error=TRUE}
 
 ## Matrix
 my_data_as_matrix = as.matrix(psr_spec)
@@ -210,7 +210,7 @@ class: inverse, center, middle
 
 # Predicting leaf chlorophyll from spectra
 
-```{r eval=TRUE, dev='pdf', fig.width = 6, fig.height = 6, error=TRUE}
+```{r eval=TRUE, error=TRUE}
 ## Load the pls library
 library("pls")
 
@@ -228,7 +228,7 @@ validation_chlo = dat[51:100, 1 ]
 ```
 ---
 
-```{r eval=TRUE, dev='pdf', fig.width = 6, fig.height = 6}
+```{r eval=TRUE, dev='png', fig.width = 6, fig.height = 6, dpi=600, out.width = "400px"}
 ## Fit the model
 fit = plsr(chlorophyll ~ ., data = training_data, ncomp = 5)
 
@@ -236,5 +236,5 @@ fit = plsr(chlorophyll ~ ., data = training_data, ncomp = 5)
 prediction = predict(object = fit, newdata = validation_spec, ncomp = 5)
 
 ## Plot truth against predictions
-plot(validation_chlo, prediction, cex = 1.2, pch = 16)
+par(mar = c(6,6,0,0)); plot(validation_chlo, prediction, pch = 16)
 ```
