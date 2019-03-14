@@ -1,0 +1,240 @@
+---
+title: "Spectrolab"
+subtitle: "hyperspectral data wrangling with R"
+author: "Jose Eduardo Meireles"
+date: "jose.meireles@maine.edu"
+output:
+  xaringan::moon_reader:
+    chakra: libs/remark-latest.min.js
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+class: inverse, center, middle
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library("spectrolab")
+library("pls")
+
+i_spec = read_spectra("../data/psr/", format = "sed")
+i_spec = smooth(i_spec[ , 400:2400])
+```
+
+<style type="text/css">
+.remark-slide-content {
+    font-size: 140%;
+}
+</style>
+
+
+#Slides and data are available on github:
+#[https://github.com/meireles/learn_spectrolab](https://github.com/meireles/learn_spectrolab)
+
+---
+class: center, middle
+
+```{r dev='pdf', fig.width = 14, fig.height = 11, echo=FALSE}
+par(mar = c(6,6,4,4))
+plot(i_spec, cex.lab = 2, cex.axis = 2, lwd = 3, col = c("blue", "orange"))
+```
+
+---
+
+# Outline
+
+1. Getting Started
+
+2. Reading & Inspecting spectra
+
+3. Visualizing spectra
+
+4. Manipulating / Processing spectra
+
+5. Exporting spectra
+
+6. **Predicting leaf chemistry from spectra**
+
+---
+class: inverse, center, middle
+
+# 1. Getting Started
+
+---
+
+# To start using spectrolab, you should:
+
+### 1. Install it from either:
+
+[CRAN](https://cran.r-project.org/web/packages/spectrolab/) (stable):
+
+```{r eval=FALSE, tidy=FALSE}
+install.packages("spectrolab")
+```
+
+[GitHub](https://github.com/meireles/spectrolab) (cutting edge):
+
+```{r eval=FALSE, tidy=FALSE}
+library("devtools")
+devtools::install_github("meireles/spectrolab")
+```
+
+### 2. Load spectrolab into R:
+
+```{r eval=TRUE, message=FALSE}
+library("spectrolab")
+```
+
+---
+class: inverse, center, middle
+# 2. Reading & Inspecting spectra
+---
+
+# Read spectra from *instrument files*
+
+```{r eval=TRUE, tidy=FALSE}
+## Read the PSR spectra from a directory
+psr_spec = read_spectra(path = "../data/psr/", format = "sed")
+```
+
+This results in an object of class **spectra**
+```{r eval=TRUE, tidy=FALSE}
+## Inspect spectra
+psr_spec
+
+## Find out the name of the two first individual spectra
+names(psr_spec)[1:2]
+```
+
+
+---
+# Read spectra from a *matrix*
+
+```{r eval=TRUE, tidy=FALSE}
+## Read CSV
+csv = read.csv("../data/csv/spec_mat.csv", check.names = FALSE, as.is = TRUE)
+
+## Look at the matrix
+csv[1:3, 1:5]
+
+## Convert the matrix to spectra
+csv_spec = as.spectra(x = csv, name_idx = 1, meta_idxs = 2)
+
+## and look at the spectra
+csv_spec
+```
+
+---
+class: inverse, center, middle
+# 3. Visualizing spectra
+---
+
+# Plot spectra
+
+### Statically with *plot*
+
+```{r eval=TRUE, dev='pdf', fig.width = 10, fig.height = 4.5}
+par(mfrow = c(1, 2))
+plot(psr_spec, lwd = 2, col = c("orange", "darkgreen", "purple"))
+plot(csv_spec, xlab = "Wavelength nm", main = "My Spec")
+```
+
+---
+# Plot spectra
+
+### Interactively with *plot_interactive*
+
+```{r eval=FALSE}
+# Demo
+plot_interactive(psr_spec)
+```
+
+---
+class: inverse, center, middle
+# 4. Manipulating / Processing spectra
+---
+
+# Manipulating spectra: e.g. subset
+
+```{r eval=TRUE, dev='pdf', fig.width = 5, fig.height = 5, error=TRUE}
+
+## Subset spectra like if they were matrices
+psr_spec_trim = psr_spec[1:2 , 400:700]
+psr_spec_trim
+
+## Except that you **MUST** subset bands by their wavelength, **not** by position!
+psr_spec[ , 1:10]
+```
+
+---
+
+# Processing spectra: e.g. smooth
+
+```{r eval=TRUE, dev='pdf', fig.width = 9, fig.height = 4.5, error=FALSE, warning=FALSE, message=FALSE}
+## Smooth spectra with a moving average
+psr_spec_smooth = smooth(psr_spec,
+                         method = "moving_average", n = 20)
+
+## Plot them
+par(mfrow = c(1, 2), mar = c(7, 5, 1, 1))
+plot(psr_spec[1, 360:700])
+plot(psr_spec_smooth[1, 360:700])
+```
+
+---
+class: inverse, center, middle
+# 5. Exporting spectra
+---
+
+# Convert spectra into other objects
+
+Convert spectra into **matrix** or **data.frame** in order to export or use them in regressions, ordinations, etc.
+
+```{r eval=TRUE, dev='pdf', fig.width = 5, fig.height = 5, error=TRUE}
+
+## Matrix
+my_data_as_matrix = as.matrix(psr_spec)
+
+## Data Frame
+my_data_as_df     = as.data.frame(psr_spec)
+
+## Quick peek
+my_data_as_df[1:3, 1:4]
+```
+
+---
+class: inverse, center, middle
+# 6. Predicting leaf chemistry from spectra
+---
+
+# Predicting leaf chlorophyll from spectra
+
+```{r eval=TRUE, dev='pdf', fig.width = 6, fig.height = 6, error=TRUE}
+## Load the pls library
+library("pls")
+
+## Convert the spectra with the chloro metadata into a data frame
+dat  = as.data.frame(csv_spec)
+
+## Remove useless columns and fix chloro class (factor to numeric)
+dat["sample_name"] = NULL 
+dat["chlorophyll"] = as.numeric(as.character(dat[ , "chlorophyll"]))
+
+## Divide data into "training" and "validation"
+training_data   = dat[1:50,   ]
+validation_spec = dat[51:100, -1]
+validation_chlo = dat[51:100, 1 ]
+```
+---
+
+```{r eval=TRUE, dev='pdf', fig.width = 6, fig.height = 6}
+## Fit the model
+fit = plsr(chlorophyll ~ ., data = training_data, ncomp = 5)
+
+## Predict chlorophyll from spectra!
+prediction = predict(object = fit, newdata = validation_spec, ncomp = 5)
+
+## Plot truth against predictions
+plot(validation_chlo, prediction, cex = 1.2, pch = 16)
+```
